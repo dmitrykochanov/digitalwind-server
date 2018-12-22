@@ -4,12 +4,14 @@ import com.dmko.iconf.base.BaseResponse
 import com.dmko.iconf.conferences.entities.ConferenceEntity
 import com.dmko.iconf.conferences.entities.ConferenceResponse
 import com.dmko.iconf.conferences.entities.ParticipantEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
 class ConferencesController(private val conferencesDao: ConferencesDao) {
 
     @CrossOrigin
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/conferences")
     fun getConferences(): BaseResponse<List<ConferenceResponse>> {
         val conferencesWithParticipants = mutableListOf<ConferenceResponse>()
@@ -28,6 +30,7 @@ class ConferencesController(private val conferencesDao: ConferencesDao) {
     }
 
     @CrossOrigin
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/conference/{conferenceId}")
     fun getConference(@PathVariable("conferenceId") conferenceId: Long): BaseResponse<ConferenceResponse> {
         val conference = conferencesDao.findConferenceById(conferenceId)
@@ -42,6 +45,7 @@ class ConferencesController(private val conferencesDao: ConferencesDao) {
     }
 
     @CrossOrigin
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/conferences")
     fun addConference(@RequestBody conferenceEntity: ConferenceEntity): BaseResponse<Nothing> {
         return try {
@@ -53,6 +57,7 @@ class ConferencesController(private val conferencesDao: ConferencesDao) {
     }
 
     @CrossOrigin
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/conferences/{conferenceId}")
     fun deleteConference(@PathVariable("conferenceId") conferenceId: Long): BaseResponse<Nothing> {
         return try {
@@ -64,6 +69,7 @@ class ConferencesController(private val conferencesDao: ConferencesDao) {
     }
 
     @CrossOrigin
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/conferences/{conferenceId}/participants")
     fun addParticipantToConference(@PathVariable("conferenceId") conferenceId: Long, @RequestBody participantEntity: ParticipantEntity): BaseResponse<Nothing> {
         return try {
@@ -75,6 +81,7 @@ class ConferencesController(private val conferencesDao: ConferencesDao) {
     }
 
     @CrossOrigin
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/conferences/{conferenceId}/participants")
     fun deleteParticipantFromConference(@PathVariable("conferenceId") conferenceId: Long, @RequestBody participantId: Long): BaseResponse<Nothing> {
         return try {

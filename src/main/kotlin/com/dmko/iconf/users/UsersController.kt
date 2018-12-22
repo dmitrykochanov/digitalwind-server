@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import java.util.stream.Collectors
 
 @RestController()
 @RequestMapping("/users")
@@ -33,8 +34,11 @@ class UsersController(private var usersDao: UsersDao, private var bCryptPassword
             usersDao.insertUser(newUser)
 
             val insertedUser = usersDao.findUserByEmail(signUpRequest.email)!!
+            usersDao.addRoleToUser(insertedUser.id, 2)
+            val roles = usersDao.getUserRoles(insertedUser.id).stream().map { it.name }.collect(Collectors.joining(","))
             val token = JWT.create()
                     .withSubject(insertedUser.email)
+                    .withClaim(AuthConstants.AUTHORITIES_KEY, roles)
                     .withExpiresAt(Date(Long.MAX_VALUE))
                     .sign(Algorithm.HMAC512(AuthConstants.SECRET.toByteArray()))
 
@@ -54,8 +58,11 @@ class UsersController(private var usersDao: UsersDao, private var bCryptPassword
         val user = usersDao.findUserByEmail(signInRequest.email)
 
         return if (user != null && BCrypt.checkpw(signInRequest.password, user.password)) {
+
+            val roles = usersDao.getUserRoles(user.id).stream().map { it.name }.collect(Collectors.joining(","))
             val token = JWT.create()
                     .withSubject(user.email)
+                    .withClaim(AuthConstants.AUTHORITIES_KEY, roles)
                     .withExpiresAt(Date(Long.MAX_VALUE))
                     .sign(Algorithm.HMAC512(AuthConstants.SECRET.toByteArray()))
 
