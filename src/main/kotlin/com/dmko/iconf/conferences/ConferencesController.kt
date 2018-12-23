@@ -4,7 +4,12 @@ import com.dmko.iconf.base.BaseResponse
 import com.dmko.iconf.conferences.entities.ConferenceEntity
 import com.dmko.iconf.conferences.entities.ConferenceResponse
 import com.dmko.iconf.conferences.entities.ParticipantEntity
+import com.dmko.iconf.conferences.entities.ParticipateRequest
+import com.dmko.iconf.users.entities.UserEntity
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -90,5 +95,19 @@ class ConferencesController(private val conferencesDao: ConferencesDao) {
         } catch (t: Throwable) {
             BaseResponse(null, false)
         }
+    }
+
+    @CrossOrigin
+    @PreAuthorize("hasAuthority('USER')")
+    @PostMapping("/conferences/{conferenceId}/participate")
+    fun participateInConference(@AuthenticationPrincipal user: UserEntity,
+                                @PathVariable("conferenceId") conferenceId: Long,
+                                @RequestBody participateRequest: ParticipateRequest): ResponseEntity<BaseResponse<Nothing>> {
+        if (participateRequest.participate) {
+            conferencesDao.addParticipantToConference(conferenceId, user.id)
+        } else {
+            conferencesDao.deleteParticipantFromConference(conferenceId, user.id)
+        }
+        return ResponseEntity(BaseResponse(null, true), HttpStatus.OK)
     }
 }

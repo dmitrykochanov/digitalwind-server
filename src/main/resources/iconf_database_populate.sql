@@ -13,4 +13,6 @@ values (2, 'ADMIN');
 insert into users_roles (user_id, role_id)
 values (1, 1);
 insert into users_roles (user_id, role_id)
+values (2, 1);
+insert into users_roles (user_id, role_id)
 values (2, 2);

@@ -43,6 +43,4 @@ class WebSecurity(
         source.registerCorsConfiguration("/**", CorsConfiguration().applyPermitDefaultValues())
         return source
     }
-
-
 }

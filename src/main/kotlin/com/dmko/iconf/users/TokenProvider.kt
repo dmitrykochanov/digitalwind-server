@@ -18,7 +18,7 @@ import java.util.*
 import java.util.stream.Collectors
 
 @Service
-class TokenProvider(private val mapper: ObjectMapper) {
+class TokenProvider(private val usersDao: UsersDao, private val mapper: ObjectMapper) {
     fun createToken(user: UserEntity, roles: List<RoleEntity>): String {
         val rolesString = mapper.writeValueAsString(roles)
         return JWT.create()
@@ -43,12 +43,13 @@ class TokenProvider(private val mapper: ObjectMapper) {
 
         if (parsedToken.subject != null) {
 
+            val user = usersDao.findUserByEmail(parsedToken.subject)
             val rolesString = parsedToken.getClaim(AuthConstants.AUTHORITIES_KEY).asString()
             val roles: List<RoleEntity> = mapper.readValue(rolesString,
                     mapper.typeFactory.constructCollectionType(List::class.java, RoleEntity::class.java))
             val userRoles = roles.stream().map { SimpleGrantedAuthority(it.name) }.collect(Collectors.toList())
 
-            return UsernamePasswordAuthenticationToken(parsedToken.subject, null, userRoles)
+            return UsernamePasswordAuthenticationToken(user, null, userRoles)
         }
         return null
     }
