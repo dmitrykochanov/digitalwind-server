@@ -1,25 +1,23 @@
 package com.dmko.iconf.users
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
 import com.dmko.iconf.base.BaseResponse
-import com.dmko.iconf.users.auth.AuthConstants
 import com.dmko.iconf.users.entities.AuthResponse
 import com.dmko.iconf.users.entities.SignInRequest
 import com.dmko.iconf.users.entities.SignUpRequest
 import com.dmko.iconf.users.entities.UserEntity
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.bind.annotation.*
-import java.util.*
-import java.util.stream.Collectors
 
 @RestController()
 @RequestMapping("/users")
-class UsersController(private var usersDao: UsersDao, private var bCryptPasswordEncoder: BCryptPasswordEncoder) {
+class UsersController(
+        private val usersDao: UsersDao,
+        private val bCryptPasswordEncoder: BCryptPasswordEncoder,
+        private val tokenProvider: TokenProvider
+) {
 
     @CrossOrigin
     @PostMapping("/sign-up")
@@ -32,21 +30,11 @@ class UsersController(private var usersDao: UsersDao, private var bCryptPassword
                     password = bCryptPasswordEncoder.encode(signUpRequest.password)
             )
             usersDao.insertUser(newUser)
-
             val insertedUser = usersDao.findUserByEmail(signUpRequest.email)!!
-            usersDao.addRoleToUser(insertedUser.id, 2)
-            val roles = usersDao.getUserRoles(insertedUser.id).stream().map { it.name }.collect(Collectors.joining(","))
-            val token = JWT.create()
-                    .withSubject(insertedUser.email)
-                    .withClaim(AuthConstants.AUTHORITIES_KEY, roles)
-                    .withExpiresAt(Date(Long.MAX_VALUE))
-                    .sign(Algorithm.HMAC512(AuthConstants.SECRET.toByteArray()))
+            usersDao.addRoleToUser(insertedUser.id, 1)
+            val roles = usersDao.getUserRoles(insertedUser.id)
 
-            val headers = HttpHeaders()
-            headers.set(AuthConstants.HEADER_STRING, AuthConstants.TOKEN_PREFIX + token)
-
-            val response = AuthResponse(insertedUser.id, token, insertedUser.email, insertedUser.firstName, insertedUser.lastName)
-            ResponseEntity(BaseResponse(response, true), headers, HttpStatus.OK)
+            tokenProvider.createAuthResponse(insertedUser, roles)
         } catch (t: Throwable) {
             ResponseEntity(BaseResponse<AuthResponse>(null, false), HttpStatus.BAD_REQUEST)
         }
@@ -58,19 +46,8 @@ class UsersController(private var usersDao: UsersDao, private var bCryptPassword
         val user = usersDao.findUserByEmail(signInRequest.email)
 
         return if (user != null && BCrypt.checkpw(signInRequest.password, user.password)) {
-
-            val roles = usersDao.getUserRoles(user.id).stream().map { it.name }.collect(Collectors.joining(","))
-            val token = JWT.create()
-                    .withSubject(user.email)
-                    .withClaim(AuthConstants.AUTHORITIES_KEY, roles)
-                    .withExpiresAt(Date(Long.MAX_VALUE))
-                    .sign(Algorithm.HMAC512(AuthConstants.SECRET.toByteArray()))
-
-            val headers = HttpHeaders()
-            headers.set(AuthConstants.HEADER_STRING, AuthConstants.TOKEN_PREFIX + token)
-
-            val response = AuthResponse(user.id, token, user.email, user.firstName, user.lastName)
-            ResponseEntity(BaseResponse(response, true), headers, HttpStatus.OK)
+            val roles = usersDao.getUserRoles(user.id)
+            tokenProvider.createAuthResponse(user, roles)
         } else {
             ResponseEntity(BaseResponse<AuthResponse>(null, false), HttpStatus.BAD_REQUEST)
         }

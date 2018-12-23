@@ -1,5 +1,6 @@
 package com.dmko.iconf.users.auth
 
+import com.dmko.iconf.users.TokenProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
@@ -15,7 +16,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-class WebSecurity(private val userDetailsService: UserDetailsServiceImpl, private val bCryptPasswordEncoder: BCryptPasswordEncoder) : WebSecurityConfigurerAdapter() {
+class WebSecurity(
+        private val userDetailsService: UserDetailsServiceImpl,
+        private val bCryptPasswordEncoder: BCryptPasswordEncoder,
+        private val tokenProvider: TokenProvider
+) : WebSecurityConfigurerAdapter() {
 
     override fun configure(http: HttpSecurity) {
         http.cors().and().csrf().disable().authorizeRequests()
@@ -24,7 +29,7 @@ class WebSecurity(private val userDetailsService: UserDetailsServiceImpl, privat
                 .antMatchers(HttpMethod.POST, AuthConstants.SIGN_IN_URL).permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .addFilter(JWTAuthorizationFilter(authenticationManager()))
+                .addFilter(JWTAuthorizationFilter(tokenProvider, authenticationManager()))
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     }
 
@@ -38,4 +43,6 @@ class WebSecurity(private val userDetailsService: UserDetailsServiceImpl, privat
         source.registerCorsConfiguration("/**", CorsConfiguration().applyPermitDefaultValues())
         return source
     }
+
+
 }
