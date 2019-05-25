@@ -22,8 +22,8 @@ VALUES ('news2', 'body2', 'url3');
 insert into news (title, body, image_url)
 VALUES ('news3', 'body3', 'url3');
 
-insert into pictures (id, title, image_url, number, city, description)
-values ('1', 'picture1', 'url1', '1111111111', 'saratov', 'description1');
+insert into pictures (title, image_url, number, city, description)
+values ('picture1', 'url1', '1111111111', 'saratov', 'description1');
 insert into pictures (title, image_url, number, city, description)
 values ('picture2', 'url2', '2222222222', 'saratov', 'description2');
 insert into pictures (title, image_url, number, city, description)
