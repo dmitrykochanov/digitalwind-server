@@ -1,12 +1,11 @@
 package com.dmko.iconf.pictures
 
-import com.dmko.iconf.pictures.entities.Comment
-import com.dmko.iconf.pictures.entities.CommentEntity
-import com.dmko.iconf.pictures.entities.Picture
-import com.dmko.iconf.pictures.entities.PictureEntity
+import com.dmko.iconf.pictures.entities.*
 import com.dmko.iconf.users.UsersDao
 import com.dmko.iconf.users.entities.CommentRequest
 import com.dmko.iconf.users.entities.UserEntity
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -28,6 +27,17 @@ class PicturesController(
             val commentsEntities = picturesDao.getComments(entity.id)
             val comments = mutableListOf<Comment>()
 
+            val ratings = picturesDao.getRatings(entity.id)
+            val rate = if (ratings.isEmpty()) {
+                0.0
+            } else {
+                var totalRating = 0
+                for (rating in ratings) {
+                    totalRating += rating.rate
+                }
+                totalRating / ratings.size.toDouble()
+            }
+
             for (commentEntity in commentsEntities) {
                 val authorName = usersDao.findUserById(commentEntity.authorId).login
 
@@ -45,7 +55,7 @@ class PicturesController(
                     imageUrl = entity.imageUrl,
                     number = entity.number,
                     city = entity.city,
-                    rate = entity.rate,
+                    rate = rate,
                     description = entity.description,
                     comments = comments
             )
@@ -83,5 +93,25 @@ class PicturesController(
                 body = comment.body
         )
         picturesDao.insertComment(commentEntity)
+    }
+
+    @CrossOrigin
+    @PostMapping("/picture/{id}/rate/{rating}")
+    @PreAuthorize("hasAuthority('USER')")
+    fun ratePicture(
+            @PathVariable("id") pictureId: Long,
+            @PathVariable("rating") rating: Int,
+            @AuthenticationPrincipal user: UserEntity
+    ): ResponseEntity<Unit> {
+        if (rating !in 0..10) {
+            return ResponseEntity(HttpStatus.BAD_REQUEST)
+        }
+        val entity = RatingEntity(
+                userId = user.id,
+                pictureId = pictureId,
+                rate = rating
+        )
+        picturesDao.insertRating(entity)
+        return ResponseEntity(HttpStatus.OK)
     }
 }

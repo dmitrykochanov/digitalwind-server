@@ -6,7 +6,7 @@ data class Picture(
         val imageUrl: String = "",
         val number: Long,
         val city: String,
-        val rate: Int,
+        val rate: Double,
         val description: String,
         val comments: List<Comment>
 )

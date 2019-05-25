@@ -1,5 +1,6 @@
 drop table if exists users_roles;
 drop table if exists comments;
+drop table if exists ratings;
 drop table if exists users;
 drop table if exists roles;
 drop table if exists news;
@@ -46,17 +47,26 @@ create table pictures
     image_url   varchar(255),
     number      bigint,
     city        varchar(255),
-    rate        int,
     description text
 );
 
 create table comments
 (
     id         bigint primary key auto_increment,
-    picture_id bigint   not null,
+    picture_id bigint not null,
     date       bigint not null,
-    author_id  bigint   not null,
-    body       text     not null,
+    author_id  bigint not null,
+    body       text   not null,
     constraint comments_pictures_fk foreign key (picture_id) references pictures (id) on delete cascade,
     constraint comments_users_fk foreign key (author_id) references users (id) on delete cascade
 );
+
+create table ratings
+(
+    user_id    bigint,
+    picture_id bigint,
+    rate       int not null,
+    constraint ratings_pk primary key (user_id, picture_id),
+    constraint ratings_users_fk foreign key (user_id) references users (id) on delete cascade,
+    constraint ratings_pictures_fk foreign key (picture_id) references pictures (id) on delete cascade
+)

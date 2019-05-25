@@ -2,6 +2,7 @@ package com.dmko.iconf.pictures
 
 import com.dmko.iconf.pictures.entities.CommentEntity
 import com.dmko.iconf.pictures.entities.PictureEntity
+import com.dmko.iconf.pictures.entities.RatingEntity
 import org.apache.ibatis.annotations.*
 import org.springframework.stereotype.Repository
 
@@ -22,8 +23,16 @@ interface PicturesDao {
     @Delete("DELETE FROM pictures WHERE id = #{id}")
     fun deletePicture(id: Long)
 
-    @Update("UPDATE pictures SET rate= #{rate} WHERE id = #{id}")
-    fun ratePicture(id: Long, rate: Int)
+    @Select("SELECT * FROM ratings WHERE picture_id = #{pictureId}")
+    @Results(
+            Result(property = "userId", column = "user_id"),
+            Result(property = "pictureId", column = "picture_id")
+    )
+    fun getRatings(pictureId: Long): List<RatingEntity>
+
+    @Insert("""INSERT INTO ratings(user_id, picture_id, rate)
+        VALUES(#{userId}, #{pictureId}, #{rate})""")
+    fun insertRating(rating: RatingEntity)
 
     @Select("SELECT * FROM comments WHERE picture_id = #{pictureId}")
     @Results(

@@ -6,6 +6,5 @@ data class PictureEntity(
         val imageUrl: String = "",
         val number: Long,
         val city: String,
-        val rate: Int,
         val description: String
 )
