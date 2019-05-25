@@ -27,6 +27,7 @@ class WebSecurity(
                 .antMatchers(HttpMethod.POST, "/login").denyAll()
                 .antMatchers(HttpMethod.POST, AuthConstants.SIGN_UP_URL).permitAll()
                 .antMatchers(HttpMethod.POST, AuthConstants.SIGN_IN_URL).permitAll()
+                .antMatchers(HttpMethod.GET, "/images/*").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(JWTAuthorizationFilter(tokenProvider, authenticationManager()))

@@ -5,6 +5,7 @@ drop table if exists users;
 drop table if exists roles;
 drop table if exists news;
 drop table if exists pictures;
+drop table if exists images;
 
 
 -- Auth
@@ -69,4 +70,11 @@ create table ratings
     constraint ratings_pk primary key (user_id, picture_id),
     constraint ratings_users_fk foreign key (user_id) references users (id) on delete cascade,
     constraint ratings_pictures_fk foreign key (picture_id) references pictures (id) on delete cascade
-)
+);
+
+-- Images
+create table images
+(
+    id   varchar(36) primary key,
+    data longblob
+);
