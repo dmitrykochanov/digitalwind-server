@@ -12,9 +12,9 @@ import java.util.*
 class UserDetailsServiceImpl(private val usersDao: UsersDao) : UserDetailsService {
 
     override fun loadUserByUsername(username: String): UserDetails {
-        val userEntity: UserEntity? = usersDao.findUserByEmail(username)
+        val userEntity: UserEntity? = usersDao.findUserByLogin(username)
         if (userEntity != null) {
-            return User(userEntity.email, userEntity.password, Collections.emptyList())
+            return User(userEntity.login, userEntity.password, Collections.emptyList())
         }
         throw IllegalArgumentException("User with email $username not found")
     }

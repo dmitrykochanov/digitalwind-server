@@ -1,6 +1,6 @@
 package com.dmko.iconf.users.entities
 
-data class SignInRequest(
-        val email: String,
+data class AuthRequest(
+        val login: String,
         val password: String
 )

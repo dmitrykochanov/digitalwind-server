@@ -12,12 +12,12 @@ import org.springframework.stereotype.Repository
 @Repository
 interface UsersDao {
 
-    @Insert("""INSERT INTO users(email, first_name, last_name, password)
-        VALUES(#{email}, #{firstName}, #{lastName}, #{password})""")
+    @Insert("""INSERT INTO users(login, password)
+        VALUES(#{login}, #{password})""")
     fun insertUser(userEntity: UserEntity)
 
-    @Select("SELECT * FROM users WHERE email = #{email} LIMIT 1")
-    fun findUserByEmail(email: String): UserEntity?
+    @Select("SELECT * FROM users WHERE login = #{login} LIMIT 1")
+    fun findUserByLogin(login: String): UserEntity?
 
     @Select("""SELECT roles.id, roles.name
         FROM users_roles JOIN roles ON users_roles.role_id = roles.id
