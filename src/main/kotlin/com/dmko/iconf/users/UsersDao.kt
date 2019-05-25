@@ -19,6 +19,9 @@ interface UsersDao {
     @Select("SELECT * FROM users WHERE login = #{login} LIMIT 1")
     fun findUserByLogin(login: String): UserEntity?
 
+    @Select("SELECT * FROM users WHERE id = #{id} LIMIT 1")
+    fun findUserById(id: Long): UserEntity
+
     @Select("""SELECT roles.id, roles.name
         FROM users_roles JOIN roles ON users_roles.role_id = roles.id
         WHERE users_roles.user_id = #{userId}""")

@@ -1,6 +1,10 @@
 drop table if exists users_roles;
+drop table if exists comments;
 drop table if exists users;
 drop table if exists roles;
+drop table if exists news;
+drop table if exists pictures;
+
 
 -- Auth
 create table users
@@ -32,4 +36,25 @@ create table news
     title     varchar(255) not null,
     body      text         not null,
     image_url varchar(255)
-)
+);
+
+-- Pictures
+create table pictures
+(
+    id          bigint primary key auto_increment,
+    title       varchar(255),
+    image_url    varchar(255),
+    number      bigint,
+    city        varchar(255),
+    rate        int,
+    description text
+);
+
+create table comments
+(
+    id        bigint primary key auto_increment,
+    date      datetime,
+    author_id bigint,
+    body      text,
+    constraint comments_users_fk foreign key (author_id) references users (id) on delete cascade
+);
