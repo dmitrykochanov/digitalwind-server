@@ -42,8 +42,8 @@ create table news
 create table pictures
 (
     id          bigint primary key auto_increment,
-    title       varchar(255),
-    image_url    varchar(255),
+    title       varchar(255) not null,
+    image_url   varchar(255),
     number      bigint,
     city        varchar(255),
     rate        int,
@@ -52,9 +52,11 @@ create table pictures
 
 create table comments
 (
-    id        bigint primary key auto_increment,
-    date      datetime,
-    author_id bigint,
-    body      text,
+    id         bigint primary key auto_increment,
+    picture_id bigint   not null,
+    date       bigint not null,
+    author_id  bigint   not null,
+    body       text     not null,
+    constraint comments_pictures_fk foreign key (picture_id) references pictures (id) on delete cascade,
     constraint comments_users_fk foreign key (author_id) references users (id) on delete cascade
 );

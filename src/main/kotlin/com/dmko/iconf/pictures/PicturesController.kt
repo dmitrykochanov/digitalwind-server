@@ -1,10 +1,14 @@
 package com.dmko.iconf.pictures
 
 import com.dmko.iconf.pictures.entities.Comment
+import com.dmko.iconf.pictures.entities.CommentEntity
 import com.dmko.iconf.pictures.entities.Picture
 import com.dmko.iconf.pictures.entities.PictureEntity
 import com.dmko.iconf.users.UsersDao
+import com.dmko.iconf.users.entities.CommentRequest
+import com.dmko.iconf.users.entities.UserEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -62,5 +66,22 @@ class PicturesController(
     @PreAuthorize("hasAuthority('ADMIN')")
     fun deletePicture(@PathVariable("id") id: Long) {
         picturesDao.deletePicture(id)
+    }
+
+    @CrossOrigin
+    @PostMapping("/picture/{id}/comment")
+    @PreAuthorize("hasAuthority('USER')")
+    fun addComment(
+            @PathVariable("id") id: Long,
+            @RequestBody comment: CommentRequest,
+            @AuthenticationPrincipal user: UserEntity
+    ) {
+        val commentEntity = CommentEntity(
+                pictureId = id,
+                date = System.currentTimeMillis(),
+                authorId = user.id,
+                body = comment.body
+        )
+        picturesDao.insertComment(commentEntity)
     }
 }
