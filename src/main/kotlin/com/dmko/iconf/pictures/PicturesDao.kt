@@ -16,8 +16,8 @@ interface PicturesDao {
     )
     fun getPictures(): List<PictureEntity>
 
-    @Insert("""INSERT INTO pictures(title, image_url, number, city, rate, description)
-        VALUES(#{title}, #{imageUrl}, #{number}, #{city}, #{rate}, #{description})""")
+    @Insert("""INSERT INTO pictures(title, image_url, number, city, description)
+        VALUES(#{title}, #{imageUrl}, #{number}, #{city}, #{description})""")
     fun insertPicture(picture: PictureEntity)
 
     @Delete("DELETE FROM pictures WHERE id = #{id}")
