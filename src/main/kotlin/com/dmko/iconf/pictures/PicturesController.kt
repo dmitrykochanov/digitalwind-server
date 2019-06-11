@@ -18,7 +18,6 @@ class PicturesController(
 
     @CrossOrigin
     @GetMapping("/pictures")
-    @PreAuthorize("hasAuthority('USER')")
     fun getPictures(): List<Picture> {
         val picturesEntities = picturesDao.getPictures()
         val pictures = mutableListOf<Picture>()

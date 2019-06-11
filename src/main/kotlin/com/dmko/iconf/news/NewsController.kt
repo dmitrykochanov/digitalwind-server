@@ -12,7 +12,6 @@ class NewsController(
 
     @CrossOrigin
     @GetMapping
-    @PreAuthorize("hasAuthority('USER')")
     fun getNews() = newsDao.getNews()
 
     @CrossOrigin
